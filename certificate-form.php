@@ -1,6 +1,6 @@
 <?php
 session_start();
-$conn = new mysqli('localhost', 'u160915605_certificatecok', 'CertificateCok@321', 'u160915605_certificatecok');
+include('file/config.php');
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");

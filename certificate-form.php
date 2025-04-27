@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                           }
                       
                           // https://certification.cokinstitute.com/view-
-                          $codeContents = "https://yourdomain.com/certificate.php?id=$candidateId"; // Your certificate link
+                          $codeContents = "https://certification.cokinstitute.com/view-certificate.php?id=$candidateId"; // Your certificate link
                       
                           // Clean candidate name for file name
                           $cleanName = preg_replace('/[^A-Za-z0-9\-]/', '_', $candidateName);

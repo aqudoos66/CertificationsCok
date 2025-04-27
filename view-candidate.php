@@ -4,7 +4,7 @@ session_start();
 // Check if user is not logged in (assuming you set a session variable like 'user_id' on login)
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php"); // Redirect to your login page
-    exit(); // Make sure to exit after redirect
+    exit();
 }
 ?>
 
@@ -20,7 +20,6 @@ if (!isset($_SESSION['user_id'])) {
   <link rel="stylesheet" href="assets/css/custom.css">
   <link rel="shortcut icon" type="image/x-icon" href="assets/img/cok/logo.webp" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
 </head>
 
 <body>
@@ -79,7 +78,7 @@ if (!isset($_SESSION['user_id'])) {
                         }
 
                         // Fetch candidate data
-                        $sql = "SELECT `serial_no`, `candidate_name`, `cnic`, `course_name`, `grade`, `from_date`, `to_date` FROM `candidates`";
+                        $sql = "SELECT `id`,`serial_no`, `candidate_name`, `cnic`, `course_name`, `grade`, `from_date`, `to_date` FROM `candidates`";
 
                         
 
@@ -96,16 +95,18 @@ if (!isset($_SESSION['user_id'])) {
                                 echo "<td>" . htmlspecialchars($row['grade']) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['from_date']) . " to " . htmlspecialchars($row['to_date']) . "</td>";
                                 echo "<td>
-                                      <a href='view_candidate.php?id=" . urlencode($row['serial_no']) . "' class='btn btn-outline-primary' title='View Candidate'>
-                                          <i class='fas fa-eye'></i> 
-                                      </a>
-                                      <a href='edit_candidate.php?id=" . urlencode($row['serial_no']) . "' class='btn btn-outline-warning' title='Edit Candidate'>
-                                          <i class='fas fa-edit'></i> 
-                                      </a>
-                                      <a href='delete_candidate.php?id=" . urlencode($row['serial_no']) . "' class='btn btn-outline-danger' title='Delete Candidate'>
-                                          <i class='fas fa-trash-alt'></i> 
-                                      </a>
-                                    </td>";
+      <div class='btn-group'>
+        <a href='view-certificate.php?id=" . $row['id'] . "' class='btn btn-outline-primary' title='View Certificate'>
+            <i class='fas fa-eye'></i>
+        </a>
+        <a href='edit-candidate.php?id=" . $row['id'] . "' class='btn btn-outline-warning' title='Edit'>
+            <i class='fas fa-edit'></i>
+        </a>
+        <button class='btn btn-outline-danger delete-btn' data-id='" . $row['id'] . "' title='Delete'>
+            <i class='fas fa-trash-alt'></i>
+        </button>
+      </div>
+    </td>";
                                 echo "</tr>";
                             }
                         } else {

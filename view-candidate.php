@@ -1,9 +1,9 @@
 <?php
 session_start();
 
-// Check if user is not logged in (assuming you set a session variable like 'user_id' on login)
+// Check if user is not logged in
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Redirect to your login page
+    header("Location: login.php");
     exit();
 }
 ?>
@@ -40,16 +40,14 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="card-header">
                   <h4>Candidate Records</h4>
                   <div class="card-header-form">
-                  
-                  <form method="GET" action="">
-                  <div class="input-group">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search candidates...">
-                    <div class="input-group-btn">
-                      <button type="button" class="btn btn-primary" title="Search"><i class="fas fa-search"></i></button>
-                    </div>
-                  </div>
-                  </form>
-                  
+                    <form method="GET" action="">
+                      <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search candidates...">
+                        <div class="input-group-btn">
+                          <button type="button" class="btn btn-primary" title="Search"><i class="fas fa-search"></i></button>
+                        </div>
+                      </div>
+                    </form>
                   </div>
                 </div>
                 <div class="card-body p-0">
@@ -68,7 +66,6 @@ if (!isset($_SESSION['user_id'])) {
                       </thead>
                       <tbody>
                         <?php
-                       
                         include('file/config.php');
 
                         // Search feature
@@ -79,15 +76,11 @@ if (!isset($_SESSION['user_id'])) {
 
                         // Fetch candidate data
                         $sql = "SELECT `id`,`serial_no`, `candidate_name`, `cnic`, `course_name`, `grade`, `from_date`, `to_date` FROM `candidates`";
-
-                        
-
                         $result = $conn->query($sql);
 
                         if ($result->num_rows > 0) {
-                            // output data for each row
                             while($row = $result->fetch_assoc()) {
-                                echo "<tr>";
+                                echo "<tr id='row-".$row['id']."'>";
                                 echo "<td>" . htmlspecialchars($row['serial_no']) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['candidate_name']) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['cnic']) . "</td>";
@@ -95,28 +88,26 @@ if (!isset($_SESSION['user_id'])) {
                                 echo "<td>" . htmlspecialchars($row['grade']) . "</td>";
                                 echo "<td>" . htmlspecialchars($row['from_date']) . " to " . htmlspecialchars($row['to_date']) . "</td>";
                                 echo "<td>
-      <div class='btn-group'>
-        <a href='view-certificate.php?id=" . $row['id'] . "' class='btn btn-outline-primary' title='View Certificate'>
-            <i class='fas fa-eye'></i>
-        </a>
-        <a href='edit-candidate.php?id=" . $row['id'] . "' class='btn btn-outline-warning' title='Edit'>
-            <i class='fas fa-edit'></i>
-        </a>
-        <button class='btn btn-outline-danger delete-btn' data-id='" . $row['id'] . "' title='Delete'>
-            <i class='fas fa-trash-alt'></i>
-        </button>
-      </div>
-    </td>";
+                                        <div class='btn-group'>
+                                          <a href='view-certificate.php?id=" . $row['id'] . "' class='btn btn-outline-primary' title='View Certificate'>
+                                              <i class='fas fa-eye'></i>
+                                          </a>
+                                          <a href='edit-candidate.php?id=" . $row['id'] . "' class='btn btn-outline-warning' title='Edit'>
+                                              <i class='fas fa-edit'></i>
+                                          </a>
+                                          <button class='btn btn-outline-danger delete-btn' data-id='" . $row['id'] . "' title='Delete'>
+                                              <i class='fas fa-trash-alt'></i>
+                                          </button>
+                                        </div>
+                                      </td>";
                                 echo "</tr>";
                             }
                         } else {
                             echo "<tr><td colspan='7'>No candidates found.</td></tr>";
                         }
-
                         $conn->close();
                         ?>
-                        </tbody>
-
+                      </tbody>
                     </table>
                   </div>
                 </div>
@@ -131,23 +122,73 @@ if (!isset($_SESSION['user_id'])) {
   </div>
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+  $(document).ready(function() {
+      // Search Functionality
+      $("#searchInput").on("keyup", function() {
+          var search = $(this).val();
+          $.ajax({
+              url: "search_candidates.php",
+              type: "GET",
+              data: { search: search },
+              success: function(data) {
+                  $("tbody").html(data);
+              }
+          });
+      });
 
-<script>
-$(document).ready(function() {
-    $("#searchInput").on("keyup", function() {
-        var search = $(this).val();
-        $.ajax({
-            url: "search_candidates.php",
-            type: "GET",
-            data: { search: search },
-            success: function(data) {
-                $("tbody").html(data); // Replace table body with new rows
-            }
-        });
-    });
-});
-</script>
-
+      // Delete Functionality with SweetAlert
+      $(document).on('click', '.delete-btn', function() {
+          var id = $(this).data('id');
+          var row = $(this).closest('tr');
+          
+          Swal.fire({
+              title: 'Are you sure?',
+              text: "You won't be able to revert this!",
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  $.ajax({
+                      url: "delete-candidate.php",
+                      type: "POST",
+                      data: { id: id },
+                      dataType: 'json',
+                      success: function(response) {
+                          if (response.status === 'success') {
+                              Swal.fire(
+                                  'Deleted!',
+                                  'Candidate has been deleted.',
+                                  'success'
+                              );
+                              row.fadeOut(300, function() {
+                                  $(this).remove();
+                              });
+                          } else {
+                              Swal.fire(
+                                  'Error!',
+                                  response.message || 'Failed to delete candidate.',
+                                  'error'
+                              );
+                          }
+                      },
+                      error: function() {
+                          Swal.fire(
+                              'Error!',
+                              'An error occurred while processing the request.',
+                              'error'
+                          );
+                      }
+                  });
+              }
+          });
+      });
+  });
+  </script>
 
   <script src="assets/js/app.min.js"></script>
   <script src="assets/js/scripts.js"></script>

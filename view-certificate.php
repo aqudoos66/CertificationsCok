@@ -2,7 +2,10 @@
 session_start();
 require_once('file/config.php');
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 168a200f4329c15a6dd5b4f17a3ecc185da80589
 // Check if ID parameter exists
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid candidate ID");

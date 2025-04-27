@@ -46,7 +46,7 @@ if ($result->num_rows > 0) {
         $serialNo = $row['serial_no'];
         $candidateName = $row['candidate_name'];
 
-        $codeContents = "https://yourdomain.com/certificate.php?id=$candidateId";
+        $codeContents = "https://certification.cokinstitute.com/view-certificate.php?id=$candidateId";
 
         
         $cleanName = preg_replace('/[^A-Za-z0-9\-]/', '_', $candidateName);

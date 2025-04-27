@@ -19,22 +19,21 @@
               </ul>
             </li>
             <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="command"></i><span>Apps</span></a>
+              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="command"></i><span>Course</span></a>
               <ul class="dropdown-menu">
-                <li><a class="nav-link" href="chat.html">Chat</a></li>
-                <li><a class="nav-link" href="portfolio.html">Portfolio</a></li>
-                <li><a class="nav-link" href="blog.html">Blog</a></li>
-                <li><a class="nav-link" href="calendar.html">Calendar</a></li>
+                <li><a class="nav-link" href="chat.html">Add</a></li>
+                <li><a class="nav-link" href="portfolio.html">view</a></li>
+                
               </ul>
             </li>
-            <li class="dropdown">
+<!--             <li class="dropdown">
               <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="mail"></i><span>Email</span></a>
               <ul class="dropdown-menu">
                 <li><a class="nav-link" href="email-inbox.html">Inbox</a></li>
                 <li><a class="nav-link" href="email-compose.html">Compose</a></li>
                 <li><a class="nav-link" href="email-read.html">read</a></li>
               </ul>
-            </li>
+            </li> -->
             
           </ul>
         </aside>

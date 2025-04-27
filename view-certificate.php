@@ -43,10 +43,6 @@ $toDate = date('d M, Y', strtotime($candidate['to_date']));
 </head>
 <body>
 
-<!-- Print Button -->
-<button onclick="window.print()" class="print-button">
-    Print Certificate 🖨️
-</button>
 
 <!-- Certificate Container -->
 <div class="certificate-container">

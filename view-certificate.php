@@ -2,12 +2,6 @@
 session_start();
 require_once('file/config.php');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-
 // Check if ID parameter exists
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Invalid candidate ID");

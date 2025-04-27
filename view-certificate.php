@@ -44,9 +44,9 @@ $toDate = date('d M, Y', strtotime($candidate['to_date']));
 <body>
 
 <!-- Print Button -->
-<button onclick="window.print()" class="print-button">
-    Print Certificate 🖨️
-</button>
+// <button onclick="window.print()" class="print-button">
+//     Print Certificate 🖨️
+// </button>
 
 <!-- Certificate Container -->
 <div class="certificate-container">

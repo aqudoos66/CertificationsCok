@@ -21,27 +21,11 @@
             <li class="dropdown">
               <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="command"></i><span>Course</span></a>
               <ul class="dropdown-menu">
-<<<<<<< HEAD
+
                 <li><a class="nav-link" href="add-course.php">Add</a></li>
                 <li><a class="nav-link" href="course.php">View</a></li>
               </ul>
             </li>
-            <!-- <li class="dropdown">
-=======
-                <li><a class="nav-link" href="chat.html">Add</a></li>
-                <li><a class="nav-link" href="portfolio.html">view</a></li>
-                
-              </ul>
-            </li>
-<!--             <li class="dropdown">
->>>>>>> f717649334909b0cb94eb60418a7aea023954be4
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="mail"></i><span>Email</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="email-inbox.html">Inbox</a></li>
-                <li><a class="nav-link" href="email-compose.html">Compose</a></li>
-                <li><a class="nav-link" href="email-read.html">read</a></li>
-              </ul>
-            </li> -->
             
           </ul>
         </aside>

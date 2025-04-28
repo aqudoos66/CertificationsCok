@@ -1,15 +1,29 @@
 <?php
+include('file/config.php'); // Include your database connection
 
-include('file/config.php');
-
+// Initialize variables
 $candidate = null;
 $certificateMessage = '';
+$certificateExists = false;
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get the CNIC from the form
+// Handle Search form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'search') {
     $cnic = $_POST['cnic'];
+    header("Location: index.php?cnic=" . urlencode($cnic));
+    exit();
+}
 
-    // Fetch candidate data
+// Handle Print Certificate form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'print') {
+    $cnic = $_POST['cnic'];
+    header("Location: E-certificate/index.php?cnic=" . urlencode($cnic));
+    exit();
+}
+
+// Fetch candidate if CNIC passed via GET
+if (isset($_GET['cnic'])) {
+    $cnic = $_GET['cnic'];
+
     $stmt = $conn->prepare("SELECT * FROM candidates WHERE cnic = ?");
     $stmt->bind_param("s", $cnic);
     $stmt->execute();
@@ -17,9 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $candidate = $result->fetch_assoc();
     $stmt->close();
 
-    // If the certificate exists, show success message and the "View Certificate" button
     if ($candidate) {
-        $certificateMessage = "Congratulations! You have a certificate.";
+        $certificateMessage = "Congratulations! " . htmlspecialchars($candidate['candidate_name']);
         $certificateExists = true;
     } else {
         $certificateMessage = "Certificate not found for the provided CNIC.";
@@ -32,84 +45,129 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>COK - Certificate</title>
-  <link rel="stylesheet" href="assets/css/app.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/custom.css">
-  <link rel='shortcut icon' type='image/x-icon' href='assets/img/cok/logo.webp' />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Certificate Verification System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 450px;
+      width: 100%;
+    }
+    .logo img {
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 25px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    p {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 25px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    input[type="text"] {
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+    input[type="text"]:focus {
+      border-color: #00acc1;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,172,193,0.5);
+    }
+    button {
+      padding: 15px;
+      background: linear-gradient(135deg, #00acc1, #00796b);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.4s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #00796b, #004d40);
+      transform: translateY(-2px);
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 30px 20px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
-
 <body>
-  <div class="loader"></div>
-  <div id="app">
-    <div class="main-wrapper main-wrapper-1">
-      <div class="navbar-bg"></div>
 
-      <nav class="navbar navbar-expand-lg main-navbar sticky">
-        <div class="navbar-nav ml-auto">
-          <a href="login.php" style="text-decoration:none; color:white;" class="btn btn-primary mr-3">Admin</a>
-        </div>
-      </nav>
-
-      <div class="main-sidebar sidebar-style-2">
-        <aside id="sidebar-wrapper">
-          <div class="sidebar-brand">
-            <a href="index.php"> <img alt="image" src="assets/img/cok/logo.webp" class="header-logo" /> <span class="logo-name">COK</span>
-            </a>
-          </div>
-        </aside>
-      </div>
-
-      <div class="main-content">
-        <section class="section">
-          <div class="row">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-header">
-                  <h4>Search your certificate</h4>
-                </div>
-                <div class="card-body">
-                  <form id="candidateForm" class="form-horizontal" action="index.php" method="POST">
-                    <div class="form-row">
-                      <div class="form-group col-md-12">
-                        <label>CNIC</label>
-                        <input type="text" class="form-control" name="cnic" id="cnic" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" placeholder="12345-1234567-1" required>
-                        <small class="form-text text-muted">Format: 12345-1234567-1</small>
-                      </div>
-                    </div>
-
-                    <div class="form-group text-center">
-                      <button type="submit" class="btn btn-primary">Search</button>
-                    </div>
-                  </form>
-                </div>
-                
-                <!-- Display Success Message or Error -->
-                <?php
-                if ($certificateMessage) {
-                    echo "<div class='alert alert-".($certificateExists ? "success" : "danger")." text-center'>$certificateMessage</div>";
-                    // Show "View Certificate" button if certificate exists
-                    if ($certificateExists) {
-                        echo "<div class='text-center'>
-                                <a href='certificate.php?cnic=" . urlencode($cnic) . "' class='btn btn-success'>View Certificate</a>
-                              </div>";
-                    }
-                }
-                ?>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
+<div class="container">
+  <div class="logo">
+    <img src="assets/img/ver2.png" alt="Certificate Verification System Logo">
   </div>
 
-  <script src="assets/js/app.min.js"></script>
-  <script src="assets/js/page/index.js"></script>
-  <script src="assets/js/scripts.js"></script>
-  <script src="assets/js/custom.js"></script>
-</body>
+  <p>Verify your credentials easily by entering your CNIC below.</p>
+  
+  <!-- Search Certificate Form -->
+  <form action="index.php" method="POST">
+    <div class="input-group">
+      <input type="text" name="cnic" id="cnic" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" placeholder="12345-1234567-1" required>
+      <input type="hidden" name="action" value="search">
+      <button type="submit">Search Certificate</button>
+    </div>
+  </form>
 
+  <?php if (isset($_GET['cnic'])): ?>
+    <h2>Certificate Information</h2>
+    <p><?php echo $certificateMessage; ?></p>
+
+    <?php if ($certificateExists): ?>
+      <div id="certificate">
+        <p><strong>Name:</strong> <?php echo htmlspecialchars($candidate['candidate_name']); ?></p>
+        <p><strong>CNIC:</strong> <?php echo htmlspecialchars($candidate['cnic']); ?></p>
+      </div>
+
+      <!-- Print Certificate Form -->
+      <form action="index.php" method="POST">
+        <input type="hidden" name="cnic" value="<?php echo htmlspecialchars($candidate['cnic']); ?>">
+        <input type="hidden" name="action" value="print">
+        <button type="submit">Print Certificate</button>
+      </form>
+    <?php endif; ?>
+
+  <?php endif; ?>
+</div>
+
+</body>
 </html>

@@ -129,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                          if ($stmt->execute()) {
                           // Get the newly inserted candidate ID
                           $candidateId = $conn->insert_id;
+                          $cnic = $_POST['cnic'];
                       
                           // ==== Generate QR Code ====
                           include('webtest/phpqrcode/qrlib.php'); // include your QR code library
@@ -139,7 +140,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                           }
                       
                           // https://certification.cokinstitute.com/view-
-                          $codeContents = "https://certification.cokinstitute.com/view-certificate.php?id=$candidateId"; // Your certificate link
+                          $codeContents = "https://certification.cokinstitute.com/E-certificate/index.php?cnic=$cnic";
+                          // $codeContents = "https://certification.cokinstitute.com/view-certificate.php?id=$candidateId"; // Your certificate link
                       
                           // Clean candidate name for file name
                           $cleanName = preg_replace('/[^A-Za-z0-9\-]/', '_', $candidateName);

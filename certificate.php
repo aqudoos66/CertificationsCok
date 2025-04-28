@@ -4,7 +4,7 @@ include('file/config.php');
 
 // Get CNIC from the URL parameter
 if (isset($_GET['cnic'])) {
-    $id = $_GET['id'];
+    // $id = $_GET['id'];
     $cnic = $_GET['cnic'];
 
     // Fetch candidate data

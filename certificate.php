@@ -1,92 +1,112 @@
+<?php
+// Include database connection
+include('file/config.php');
+
+// Get CNIC from the URL parameter
+if (isset($_GET['cnic'])) {
+    $id = $_GET['id'];
+    $cnic = $_GET['cnic'];
+
+    // Fetch candidate data
+    $stmt = $conn->prepare("SELECT * FROM candidates WHERE cnic = ? or id = ?");
+    $stmt->bind_param("ss", $cnic, $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $candidate = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!$candidate) {
+        die("Certificate not found.");
+    }
+
+    // Format dates
+    $issueDate = date('d M, Y', strtotime($candidate['issue_date']));
+    $fromDate = date('d M, Y', strtotime($candidate['from_date']));
+    $toDate = date('d M, Y', strtotime($candidate['to_date']));
+} else {
+    die("No CNIC provided.");
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>COK - Certificate</title>
-  <link rel="stylesheet" href="assets/css/app.min.css">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/custom.css">
-  <link rel='shortcut icon' type='image/x-icon' href='assets/img/cok/logo.webp' />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate - <?php echo htmlspecialchars($candidate['candidate_name']); ?></title>
+    <link rel="stylesheet" href="candidate/styles.css">
 </head>
-
 <body>
-  <div class="loader"></div>
-  <div id="app">
-    <div class="main-wrapper main-wrapper-1">
-      <div class="navbar-bg"></div>
 
-      <nav class="navbar navbar-expand-lg main-navbar sticky">
-    <div class="form-inline mr-auto">
-        <!-- <ul class="navbar-nav mr-3">
-            <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg collapse-btn">
-                <i data-feather="align-justify"></i></a>
-            </li>
-        </ul> -->
+
+<!-- Certificate Container -->
+<div class="certificate-container">
+    <!-- Header Section -->
+    <div class="header">
+        <div class="header-item">Sr. No. <span class="underline"><?php echo htmlspecialchars($candidate['serial_no']); ?></span></div>
+        <div class="header-item">Registration No. <span class="underline"><?php echo htmlspecialchars($candidate['registration_no']); ?></span></div>
+        <div class="header-item">CNIC No. <span class="underline"><?php echo htmlspecialchars($candidate['cnic']); ?></span></div>
     </div>
 
-</nav>
+    <!-- Logo & Title -->
+    <div class="title-section">
+        <img src="assets/img/cok/logo.webp" alt="Logo" class="logo">
+        <div class="title-text">
+            <h1>CITY OF KNOWLEDGE</h1>
+            <p>INSTITUTE OF PROFESSIONAL & VOCATIONAL TRAININGS</p>
+        </div>
+    </div>
 
+    <!-- Certificate Details -->
+    <div class="certificate-body">
+        <p>This Certificate is awarded to <span class="bold underline"><?php echo htmlspecialchars($candidate['candidate_name']); ?></span> S/D/o <span class="bold underline"><?php echo htmlspecialchars($candidate['father_name']); ?></span></p>
+        <p>at <span class="bold underline">Nawabshah</span> on this <span class="bold underline"><?php echo $issueDate; ?></span> on successful</p>
+        <p>completion of the certificate course of <span class="bold underline"><?php echo htmlspecialchars($candidate['course_name']); ?></span> in <span class="bold underline"><?php echo htmlspecialchars($candidate['grade']); ?></span> Grade</p>
+        <p>from <span class="bold underline"><?php echo $fromDate; ?></span> to <span class="bold underline"><?php echo $toDate; ?></span> from</p>
+        <p><u><b>CITY OF KNOWLEDGE</b> (Institute of Professional & Vocational Trainings)</u></p>
+    </div>
 
-      <!-- Sidebar Link -->
-      <div class="main-sidebar sidebar-style-2">
-        <aside id="sidebar-wrapper">
-          <div class="sidebar-brand">
-            <a href="index.php"> <img alt="image" src="assets/img/cok/logo.webp" class="header-logo" /> <span
-                class="logo-name">COK</span>
-            </a>
-          </div>
-        </aside>
-      </div>
-
-
-
-      <!-- Main Content -->
-      <div class="main-content">
-        <section class="section">
-        <div class="row">
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-header">
-                    <h4>Search your certificate</h4>
-                  </div>
-                  <div class="card-body">
-                    <form id="candidateForm" class="form-horizontal" onsubmit="return validateForm()">
-                      
-                    <div class="form-row">
-    <div class="form-group col-md-12"> <!-- changed col-md-4 to col-md-12 -->
-      <label>CNIC</label>
-      <input type="text" class="form-control" id="cnic" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" 
-             placeholder="12345-1234567-1" required>
-      <small class="form-text text-muted">Format: 12345-1234567-1</small>
+    <!-- Footer -->
+<!-- Footer -->
+<div class="footer">
+    <div class="footer-item">
+        <?php if (!empty($candidate['director_signature'])): ?>
+            <img src="<?php echo htmlspecialchars($candidate['director_signature']); ?>" alt="Director Signature" width="80px" height="80px" class="signature">
+        <?php endif; ?>
+        <div class="line"></div>
+        <p><b>DIRECTOR</b></p>
+    </div>
+    <div class="footer-item">
+        <?php 
+        // Generate QR code path
+        $qrPath = 'webtest/qrcodes/' . $candidate['qr_code_filename'];
+        if (file_exists($qrPath)): ?>
+            <img src="<?php echo $qrPath; ?>" alt="QR Code" width="80px" height="80px" class="signature" style="position: relative; top: 15px;">
+            <p style="font-size: 12px;">This certificate can be verified online via the QR code</p>
+        <?php else: ?>
+            <p style="font-size: 12px;">Verification QR code not available</p>
+        <?php endif; ?>
+    </div>
+    <div class="footer-item">
+        <?php if (!empty($candidate['trainer_signature'])): ?>
+            <img src="<?php echo htmlspecialchars($candidate['trainer_signature']); ?>" alt="Trainer Signature" width="80px" height="80px" class="signature">
+        <?php endif; ?>
+        <div class="line"></div>
+        <p><b>TRAINER</b></p>
     </div>
 </div>
+</div>
 
+<script>
+window.onload = function() {
+    window.print();
+};
 
-                      <div class="form-group text-center">
-                        <button type="submit" class="btn btn-primary">Download</button>
-                        <!-- <button type="reset" class="btn btn-secondary ml-2">Reset</button> -->
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-        </section>
-      </div>
+// After print dialog (whether print or cancel), redirect
+window.onafterprint = function() {
+    window.location.href = "index.php"; // Redirect back to the search page
+};
+</script>
 
-        <?php
-          include('file/footer.php');
-        ?>
-    </div>
-  </div>
-
-  <script src="assets/js/app.min.js"></script>
-  <script src="assets/bundles/apexcharts/apexcharts.min.js"></script>
-  <script src="assets/js/page/index.js"></script>
-  <script src="assets/js/scripts.js"></script>
-  <script src="assets/js/custom.js"></script>
 </body>
-
 </html>

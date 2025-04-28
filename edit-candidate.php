@@ -12,6 +12,18 @@ if (!isset($_GET['id'])) {
     exit();
 }
 
+
+$courses = [];
+
+$sql = "SELECT course_name FROM course";
+$result = $conn->query($sql);
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $courses[] = $row['course_name'];
+    }
+}
+
 $candidateId = intval($_GET['id']);
 $errors = [];
 
@@ -226,23 +238,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       </div>
 
                       <div class="form-row">
-                        <div class="form-group col-md-4">
-                        <label>Course Name</label>
-  <select class="form-control" name="courseName" id="courseName" required>
-    <option value="">Select Course</option>
-    <option value="Web Development" <?php echo ($candidate['course_name'] == 'Web Development') ? 'selected' : ''; ?>>Web Development</option>
-    <option value="Graphic Design" <?php echo ($candidate['course_name'] == 'Graphic Design') ? 'selected' : ''; ?>>Graphic Design</option>
-    <option value="Digital Marketing" <?php echo ($candidate['course_name'] == 'Digital Marketing') ? 'selected' : ''; ?>>Digital Marketing</option>
-    <option value="Mobile App Development" <?php echo ($candidate['course_name'] == 'Mobile App Development') ? 'selected' : ''; ?>>Mobile App Development</option>
-  </select>
-                        </div>
+                        
 
-                        <div class="form-group col-md-4">
-                        <label>Issue Date</label>
-  <input type="date" name="issueDate" class="form-control" id="issueDate" 
-         max="<?php echo date('Y-m-d'); ?>" required
-         value="<?php echo htmlspecialchars($candidate['issue_date']); ?>">
-                        </div>
+                      <div class="form-group col-md-4">
+      <label>Course Name</label>
+      <select class="form-control" name="courseName" id="courseName" required>
+        <option value="">Select Course</option>
+        <?php foreach ($courses as $course): ?>
+          <option value="<?php echo htmlspecialchars($course); ?>" 
+            <?php echo ($candidate['course_name'] == $course) ? 'selected' : ''; ?>>
+            <?php echo htmlspecialchars($course); ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    </div>
+
+    <div class="form-group col-md-4">
+    <label>Issue Date</label>
+    <input type="date" name="issueDate" class="form-control" id="issueDate"
+           value="<?php echo htmlspecialchars($candidate['issue_date']); ?>" required>
+  </div>
 
                         <div class="form-group col-md-4">
                         <label>Grade</label>
@@ -258,17 +273,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       </div>
 
                       <div class="form-row">
-                        <div class="form-group col-md-6">
-                        <label>From Date</label>
-  <input type="date" class="form-control" name="fromDate" id="fromDate" required
-         value="<?php echo htmlspecialchars($candidate['from_date']); ?>">
-                        </div>
+                      <div class="form-group col-md-6">
+    <label>From Date</label>
+    <input type="date" name="fromDate" class="form-control" id="fromDate"
+           value="<?php echo htmlspecialchars($candidate['from_date']); ?>" required>
+  </div>
 
-                        <div class="form-group col-md-6">
-                        <label>To Date</label>
-  <input type="date" class="form-control" name="toDate" id="toDate" required
-         value="<?php echo htmlspecialchars($candidate['to_date']); ?>">
-                        </div>
+  <div class="form-group col-md-6">
+    <label>To Date</label>
+    <input type="date" name="toDate" class="form-control" id="toDate"
+           value="<?php echo htmlspecialchars($candidate['to_date']); ?>" required>
+  </div>
                       </div>
 
                       <div class="form-row">
@@ -322,61 +337,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   <script src="assets/bundles/jquery-selectric/jquery.selectric.min.js"></script>
   
   <!-- Custom Validation Script -->
-  <script>
-    function validateForm() {
-      // Validate date range (To date should be after From date)
-      const fromDate = new Date(document.getElementById('fromDate').value);
-      const toDate = new Date(document.getElementById('toDate').value);
-      
-      if (toDate <= fromDate) {
-        alert('"To" date must be after "From" date');
+  <script src="assets/js/app.min.js"></script>
+
+<script>
+function validateForm() {
+    const fromDate = new Date(document.getElementById('fromDate').value);
+    const toDate = new Date(document.getElementById('toDate').value);
+    if (toDate <= fromDate) {
+        alert('"To Date" must be after "From Date"');
         return false;
-      }
-      
-      // Validate CNIC format using regex
-      const cnic = document.getElementById('cnic').value;
-      const cnicRegex = /^[0-9]{5}-[0-9]{7}-[0-9]{1}$/;
-      if (!cnicRegex.test(cnic)) {
-        alert('Please enter CNIC in correct format: 12345-1234567-1');
-        return false;
-      }
-      
-      // Validate file sizes
-      const maxSize = 100 * 1024; // 100KB
-      
-      const directorFile = document.getElementById('directorSignature').files[0];
-      if (directorFile && directorFile.size > maxSize) {
-        alert('Director signature image must be less than 100KB');
-        return false;
-      }
-      
-      const trainerFile = document.getElementById('trainerSignature').files[0];
-      if (trainerFile && trainerFile.size > maxSize) {
-        alert('Trainer signature image must be less than 100KB');
-        return false;
-      }
-      
-      return true;
     }
-    
-    // Initialize CNIC input mask
-    new Cleave('#cnic', {
-      delimiters: ['-','-'],
-      blocks: [5,7,1],
-      numericOnly: true
-    });
-    
-    // Initialize date pickers
-    $('#fromDate, #toDate, #issueDate').daterangepicker({
-      singleDatePicker: true,
-      showDropdowns: true,
-      minYear: 2000,
-      maxYear: parseInt(moment().format('YYYY'), 10),
-      locale: {
-        format: 'YYYY-MM-DD'
-      }
-    });
-  </script>
+
+    const cnic = document.getElementById('cnic').value;
+    const cnicRegex = /^[0-9]{5}-[0-9]{7}-[0-9]{1}$/;
+    if (!cnicRegex.test(cnic)) {
+        alert('CNIC must be in format 12345-1234567-1');
+        return false;
+    }
+
+    const maxSize = 100 * 1024;
+    const directorFile = document.getElementById('directorSignature').files[0];
+    if (directorFile && directorFile.size > maxSize) {
+        alert('Director Signature must be under 100KB.');
+        return false;
+    }
+
+    const trainerFile = document.getElementById('trainerSignature').files[0];
+    if (trainerFile && trainerFile.size > maxSize) {
+        alert('Trainer Signature must be under 100KB.');
+        return false;
+    }
+
+    return true;
+}
+</script>
+
 
   <!-- Template JS File -->
   <script src="assets/js/scripts.js"></script>

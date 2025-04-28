@@ -1,10 +1,30 @@
 <?php
-session_start();
 
-// Check if user is not logged in (assuming you set a session variable like 'user_id' on login)
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Redirect to your login page
-    exit(); // Make sure to exit after redirect
+include('file/config.php');
+
+$candidate = null;
+$certificateMessage = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Get the CNIC from the form
+    $cnic = $_POST['cnic'];
+
+    // Fetch candidate data
+    $stmt = $conn->prepare("SELECT * FROM candidates WHERE cnic = ?");
+    $stmt->bind_param("s", $cnic);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $candidate = $result->fetch_assoc();
+    $stmt->close();
+
+    // If the certificate exists, show success message and the "View Certificate" button
+    if ($candidate) {
+        $certificateMessage = "Congratulations! You have a certificate.";
+        $certificateExists = true;
+    } else {
+        $certificateMessage = "Certificate not found for the provided CNIC.";
+        $certificateExists = false;
+    }
 }
 ?>
 
@@ -13,7 +33,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>COK - Admin Dashboard</title>
+  <title>COK - Certificate</title>
   <link rel="stylesheet" href="assets/css/app.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/components.css">
@@ -27,122 +47,66 @@ if (!isset($_SESSION['user_id'])) {
     <div class="main-wrapper main-wrapper-1">
       <div class="navbar-bg"></div>
 
-      <?php
-        include('file/navbar.php');
-      ?>
+      <nav class="navbar navbar-expand-lg main-navbar sticky">
+        <div class="navbar-nav ml-auto">
+          <a href="login.php" style="text-decoration:none; color:white;" class="btn btn-primary mr-3">Admin</a>
+        </div>
+      </nav>
 
-      <!-- Sidebar Link -->
-      <?php
-        include('file/sidebar.php');
-      ?>
+      <div class="main-sidebar sidebar-style-2">
+        <aside id="sidebar-wrapper">
+          <div class="sidebar-brand">
+            <a href="index.php"> <img alt="image" src="assets/img/cok/logo.webp" class="header-logo" /> <span class="logo-name">COK</span>
+            </a>
+          </div>
+        </aside>
+      </div>
 
-
-
-      <!-- Main Content -->
       <div class="main-content">
         <section class="section">
-          <div class="row ">
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
+          <div class="row">
+            <div class="col-12">
               <div class="card">
-                <div class="card-statistic-4">
-                  <div class="align-items-center justify-content-between">
-                    <div class="row ">
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                        <div class="card-content">
-                          <h5 class="font-15">New Booking</h5>
-                          <h2 class="mb-3 font-18">258</h2>
-                          <p class="mb-0"><span class="col-green">10%</span> Increase</p>
-                        </div>
-                      </div>
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                        <div class="banner-img">
-                          <img src="assets/img/banner/1.png" alt="">
-                        </div>
+                <div class="card-header">
+                  <h4>Search your certificate</h4>
+                </div>
+                <div class="card-body">
+                  <form id="candidateForm" class="form-horizontal" action="index.php" method="POST">
+                    <div class="form-row">
+                      <div class="form-group col-md-12">
+                        <label>CNIC</label>
+                        <input type="text" class="form-control" name="cnic" id="cnic" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" placeholder="12345-1234567-1" required>
+                        <small class="form-text text-muted">Format: 12345-1234567-1</small>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
-              <div class="card">
-                <div class="card-statistic-4">
-                  <div class="align-items-center justify-content-between">
-                    <div class="row ">
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                        <div class="card-content">
-                          <h5 class="font-15"> Customers</h5>
-                          <h2 class="mb-3 font-18">1,287</h2>
-                          <p class="mb-0"><span class="col-orange">09%</span> Decrease</p>
-                        </div>
-                      </div>
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                        <div class="banner-img">
-                          <img src="assets/img/banner/2.png" alt="">
-                        </div>
-                      </div>
+
+                    <div class="form-group text-center">
+                      <button type="submit" class="btn btn-primary">Search</button>
                     </div>
-                  </div>
+                  </form>
                 </div>
-              </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
-              <div class="card">
-                <div class="card-statistic-4">
-                  <div class="align-items-center justify-content-between">
-                    <div class="row ">
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                        <div class="card-content">
-                          <h5 class="font-15">New Project</h5>
-                          <h2 class="mb-3 font-18">128</h2>
-                          <p class="mb-0"><span class="col-green">18%</span>
-                            Increase</p>
-                        </div>
-                      </div>
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                        <div class="banner-img">
-                          <img src="assets/img/banner/3.png" alt="">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-xs-12">
-              <div class="card">
-                <div class="card-statistic-4">
-                  <div class="align-items-center justify-content-between">
-                    <div class="row ">
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pr-0 pt-3">
-                        <div class="card-content">
-                          <h5 class="font-15">Revenue</h5>
-                          <h2 class="mb-3 font-18">$48,697</h2>
-                          <p class="mb-0"><span class="col-green">42%</span> Increase</p>
-                        </div>
-                      </div>
-                      <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 pl-0">
-                        <div class="banner-img">
-                          <img src="assets/img/banner/4.png" alt="">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                
+                <!-- Display Success Message or Error -->
+                <?php
+                if ($certificateMessage) {
+                    echo "<div class='alert alert-".($certificateExists ? "success" : "danger")." text-center'>$certificateMessage</div>";
+                    // Show "View Certificate" button if certificate exists
+                    if ($certificateExists) {
+                        echo "<div class='text-center'>
+                                <a href='certificate.php?cnic=" . urlencode($cnic) . "' class='btn btn-success'>View Certificate</a>
+                              </div>";
+                    }
+                }
+                ?>
               </div>
             </div>
           </div>
         </section>
       </div>
-
-        <?php
-          include('file/footer.php');
-        ?>
     </div>
   </div>
 
   <script src="assets/js/app.min.js"></script>
-  <script src="assets/bundles/apexcharts/apexcharts.min.js"></script>
   <script src="assets/js/page/index.js"></script>
   <script src="assets/js/scripts.js"></script>
   <script src="assets/js/custom.js"></script>

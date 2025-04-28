@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['logged_in'] = true;
                 
-                header("Location: index.php"); // You can change this to any admin-specific page
+                header("Location: homepage.php"); // You can change this to any admin-specific page
                 exit();
             } else {
                 $error = "Access denied: You are not an admin.";

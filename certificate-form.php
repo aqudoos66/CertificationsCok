@@ -7,6 +7,17 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+$courses = [];
+
+$sql = "SELECT course_name FROM course";
+$result = $conn->query($sql);
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $courses[] = $row['course_name'];
+    }
+}
+
 // Handle Form Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Server-side validation
@@ -261,16 +272,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                       </div>
 
                       <div class="form-row">
-                        <div class="form-group col-md-4">
-                          <label>Course Name</label>
-                          <select class="form-control" name="courseName" id="courseName" required>
-                            <option value="">Select Course</option>
-                            <option value="Web Development" <?php echo (isset($_POST['courseName']) && $_POST['courseName'] == 'Web Development') ? 'selected' : ''; ?>>Web Development</option>
-                            <option value="Graphic Design" <?php echo (isset($_POST['courseName']) && $_POST['courseName'] == 'Graphic Design') ? 'selected' : ''; ?>>Graphic Design</option>
-                            <option value="Digital Marketing" <?php echo (isset($_POST['courseName']) && $_POST['courseName'] == 'Digital Marketing') ? 'selected' : ''; ?>>Digital Marketing</option>
-                            <option value="Mobile App Development" <?php echo (isset($_POST['courseName']) && $_POST['courseName'] == 'Mobile App Development') ? 'selected' : ''; ?>>Mobile App Development</option>
-                          </select>
-                        </div>
+                        
+                      <div class="form-group col-md-4">
+                        <label>Course Name</label>
+                        <select class="form-control" name="courseName" id="courseName" required>
+                          <option value="">Select Course</option>
+                          <?php foreach ($courses as $course): ?>
+                            <option value="<?php echo htmlspecialchars($course); ?>" 
+                              <?php echo (isset($_POST['courseName']) && $_POST['courseName'] == $course) ? 'selected' : ''; ?>>
+                              <?php echo htmlspecialchars($course); ?>
+                            </option>
+                          <?php endforeach; ?>
+                        </select>
+                      </div>
 
                         <div class="form-group col-md-4">
                           <label>Issue Date</label>
